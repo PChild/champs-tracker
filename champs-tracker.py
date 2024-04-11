@@ -44,6 +44,7 @@ for i in range(0, days + 1):
     prevLon = 0
 
     raw_marks = sorted(r.json()['GPSReports'], key=lambda k: k['CreateTime'])
+    new_marks = 0
     for mark in raw_marks:
         lat = mark['Latitude']
         lon = mark['Longitude']
@@ -54,11 +55,13 @@ for i in range(0, days + 1):
         if prevLat != roundLat and prevLon != roundLon:
             if lat != -360.0:
                 if mark['ReportID'] not in report_ids:
+                    new_marks += 1
                     gps_events.append(mark)
                     report_ids.append(mark['ReportID'])
                     prevLat = roundLat
                     prevLon = roundLon
 
+print("Added", new_marks, "new markers.")
 json.dump(gps_events, open(file_name, 'w'))
 coords = []
 for idx, mark in enumerate(gps_events):
