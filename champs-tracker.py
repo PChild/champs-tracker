@@ -64,6 +64,7 @@ for i in range(0, days + 1):
 print("Added", new_marks, "new markers.")
 json.dump(gps_events, open(file_name, 'w'))
 coords = []
+marker_list = []
 for idx, mark in enumerate(gps_events):
     lat = mark['Latitude']
     lon = mark['Longitude']
@@ -92,12 +93,8 @@ folium.PolyLine(coords, tooltip="Approx Route").add_to(m)
 lats = [coord[0] for coord in coords]
 lons = [coord[1] for coord in coords]
 
-min_lat = min(lats)
-max_lat = max(lats)
-min_lon = min(lons)
-max_lon = max(lons)
-
-m.fit_bounds([(min_lat, min_lon), (max_lat, max_lon)], padding=(50, 50))
+m.fit_bounds([(min(lats), min(lons)), (max(lats), max(lons))],
+             padding=(50, 50))
 
 if run_local:
     m.show_in_browser()
