@@ -2,16 +2,22 @@ import requests
 import folium
 import datetime
 import os
+import json
 
 m = folium.Map(location=(36.91443, -76.40804), zoom_start=6)
 
-start_date = datetime.date(2024, 4, 9)
-end_date = datetime.date(2024, 4, 22)
+file_name = "champsTracker.json"
 
-days = datetime.date.today().day - start_date.day
+gps_events = json.load(open(file_name, 'r'))
+report_ids = [mark['ReportID'] for mark in gps_events]
+
 date_fmt = "%Y-%m-%dT%H:%M:%SZ"
 
-gpsEvents = []
+start_date = datetime.datetime.strptime(
+    gps_events[-1]['CreateTime'], date_fmt)
+
+days = datetime.date.today().day - start_date.day
+
 
 for i in range(0, days):
     new_date = start_date + datetime.timedelta(i)
@@ -40,25 +46,28 @@ for i in range(0, days):
 
         if prevLat != roundLat and prevLon != roundLon:
             if lat != -360.0:
-                gpsEvents.append(mark)
-                prevLat = roundLat
-                prevLon = roundLon
+                if mark['ReportID'] not in report_ids:
+                    gps_events.append(mark)
+                    report_ids.append(mark['ReportID'])
+                    prevLat = roundLat
+                    prevLon = roundLon
 
-
+json.dump(gps_events, open(file_name, 'w'))
 coords = []
-for idx, mark in enumerate(gpsEvents):
+for idx, mark in enumerate(gps_events):
     lat = mark['Latitude']
     lon = mark['Longitude']
 
     color = "green"
     if idx > 0:
         color = "blue"
-        if idx == len(gpsEvents) - 1:
+        if idx == len(gps_events) - 1:
             color = "red"
 
     coords.append((lat, lon))
 
-    mark_dt = datetime.datetime.strptime(mark['CreateTime'], date_fmt)
+    mark_dt = datetime.datetime.strptime(
+        mark['CreateTime'], date_fmt) - datetime.timedelta(hours=4)
     mark_text = mark_dt.strftime("%m-%d-%y %I:%M %p")
 
     folium.Marker(
@@ -78,7 +87,7 @@ max_lat = max(lats)
 min_lon = min(lons)
 max_lon = max(lons)
 
-m.fit_bounds([(min_lat, min_lon), (max_lat, max_lon)], padding=(60, 60))
+m.fit_bounds([(min_lat, min_lon), (max_lat, max_lon)], padding=(50, 50))
 
 # m.show_in_browser()
 m.save("index.html")
