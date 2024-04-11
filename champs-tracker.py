@@ -70,5 +70,15 @@ for idx, mark in enumerate(gpsEvents):
 
 folium.PolyLine(coords, tooltip="Approx Route").add_to(m)
 
+lats = [coord[0] for coord in coords]
+lons = [coord[1] for coord in coords]
+
+min_lat = min(lats)
+max_lat = max(lats)
+min_lon = min(lons)
+max_lon = max(lons)
+
+m.fit_bounds([(min_lat, min_lon), (max_lat, max_lon)], padding=(60, 60))
+
 # m.show_in_browser()
 m.save("index.html")
