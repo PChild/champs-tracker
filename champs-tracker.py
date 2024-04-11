@@ -11,7 +11,8 @@ m = folium.Map(location=(36.91443, -76.40804), zoom_start=6)
 
 file_name = "champsTracker.json"
 
-gps_events = json.load(open(file_name, 'r'))
+prev_events = json.load(open(file_name, 'r'))
+gps_events = [] + prev_events
 report_ids = [mark['ReportID'] for mark in gps_events]
 
 date_fmt = "%Y-%m-%dT%H:%M:%SZ"
@@ -96,12 +97,13 @@ m.fit_bounds([(min_lat, min_lon), (max_lat, max_lon)], padding=(50, 50))
 if run_local:
     m.show_in_browser()
 else:
-    m.save("index.html")
+    if len(gps_events) != len(prev_events):
+        m.save("index.html")
 
-    repo = Repo("./")
-    diffs = repo.index.diff(None)
-    repo.index.add([file.a_path for file in diffs])
-    update_str = "Automated update at" + datetime.datetime.now().strftime(short_fmt)
-    repo.index.commit(update_str)
-    origin = repo.remote(name='origin')
-    origin.push()
+        repo = Repo("./")
+        diffs = repo.index.diff(None)
+        repo.index.add([file.a_path for file in diffs])
+        update_str = "Automated update at " + datetime.datetime.now().strftime(short_fmt)
+        repo.index.commit(update_str)
+        origin = repo.remote(name='origin')
+        origin.push()
