@@ -3,6 +3,9 @@ import folium
 import datetime
 import os
 import json
+from git import Repo
+
+run_local = False
 
 m = folium.Map(location=(36.91443, -76.40804), zoom_start=6)
 
@@ -12,6 +15,7 @@ gps_events = json.load(open(file_name, 'r'))
 report_ids = [mark['ReportID'] for mark in gps_events]
 
 date_fmt = "%Y-%m-%dT%H:%M:%SZ"
+short_fmt = "%m-%d-%y %I:%M %p"
 
 start_date = datetime.datetime.strptime(
     gps_events[-1]['CreateTime'], date_fmt)
@@ -68,7 +72,7 @@ for idx, mark in enumerate(gps_events):
 
     mark_dt = datetime.datetime.strptime(
         mark['CreateTime'], date_fmt) - datetime.timedelta(hours=4)
-    mark_text = mark_dt.strftime("%m-%d-%y %I:%M %p")
+    mark_text = mark_dt.strftime(short_fmt)
 
     folium.Marker(
         location=[lat, lon],
@@ -89,5 +93,15 @@ max_lon = max(lons)
 
 m.fit_bounds([(min_lat, min_lon), (max_lat, max_lon)], padding=(50, 50))
 
-# m.show_in_browser()
-m.save("index.html")
+if run_local:
+    m.show_in_browser()
+else:
+    m.save("index.html")
+
+    repo = Repo("./")
+    diffs = repo.index.diff(None)
+    repo.index.add([file.a_path for file in diffs])
+    update_str = "Automated update at" + datetime.datetime.now().strftime(short_fmt)
+    repo.index.commit(update_str)
+    origin = repo.remote(name='origin')
+    origin.push()
