@@ -23,8 +23,7 @@ start_date = datetime.datetime.strptime(
 
 days = datetime.date.today().day - start_date.day
 
-
-for i in range(0, days):
+for i in range(0, days + 1):
     new_date = start_date + datetime.timedelta(i)
     new_dt = new_date.strftime(date_fmt)
 
@@ -51,6 +50,7 @@ for i in range(0, days):
 
         if prevLat != roundLat and prevLon != roundLon:
             if lat != -360.0:
+                print(mark)
                 if mark['ReportID'] not in report_ids:
                     gps_events.append(mark)
                     report_ids.append(mark['ReportID'])
