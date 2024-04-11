@@ -9,6 +9,9 @@ run_local = False
 
 m = folium.Map(location=(36.91443, -76.40804), zoom_start=6)
 
+title_html = "<title>CHS to CMP Tracker</title>"
+m.get_root().html.add_child(folium.Element(title_html))
+
 file_name = "champsTracker.json"
 
 prev_events = json.load(open(file_name, 'r'))
@@ -78,7 +81,7 @@ for idx, mark in enumerate(gps_events):
         location=[lat, lon],
         tooltip=mark_text,
         popup=mark_text,
-        icon=folium.Icon(color),
+        icon=folium.Icon(color=color, icon="circle", prefix='fa'),
     ).add_to(m)
 
 folium.PolyLine(coords, tooltip="Approx Route").add_to(m)
