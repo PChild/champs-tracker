@@ -26,6 +26,7 @@ start_date = datetime.datetime.strptime(
 
 days = datetime.date.today().day - start_date.day
 
+new_marks = 0
 for i in range(0, days + 1):
     new_date = start_date + datetime.timedelta(i)
     new_dt = new_date.strftime(date_fmt)
@@ -44,7 +45,7 @@ for i in range(0, days + 1):
     prevLon = 0
 
     raw_marks = sorted(r.json()['GPSReports'], key=lambda k: k['CreateTime'])
-    new_marks = 0
+
     for mark in raw_marks:
         lat = mark['Latitude']
         lon = mark['Longitude']
@@ -99,7 +100,7 @@ m.fit_bounds([(min(lats), min(lons)), (max(lats), max(lons))],
 if run_local:
     m.show_in_browser()
 else:
-    if len(gps_events) != len(prev_events):
+    if new_marks > 0:
         m.save("index.html")
 
         repo = Repo("./")
